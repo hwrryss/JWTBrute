@@ -27,11 +27,14 @@ def preparation(url, token):
     #* Determine the Typical Service Response (Dynamic and Static parts)
     pass
 
-def request(jwt, url, mode):
+def request(jwt, key, url, mode):
     if mode == "sc":
         req = requests.head(url, cookies={"jwt":jwt})
         if req.status_code != default_code:
-            IOm.print_JWT(jwt)
+            IOm.print_JWT(jwt, key)
+            return True
+        else: 
+            return False
     
     elif mode == "ra":
         pass

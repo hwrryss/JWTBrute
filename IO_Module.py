@@ -39,8 +39,9 @@ def launch_info(url, token, corrections, attack_type, mode, wordlist):
     printdebug(f"Wordlist: {wordlist}")
     print('\n')
 
-def print_JWT(jwt):
-    tqdm.write(" [+] This JWT might work! " + jwt+ "\n")
+def print_JWT(jwt, key):
+    if key != None:
+        tqdm.write(f" [+] This JWT might work! {jwt}\n [+] Secret for the JWT: {key}\n")
     # printsol(f"[+] This JWT might work! {jwt}") # breaks the progres bar
 
 
