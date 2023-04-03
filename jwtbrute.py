@@ -1,11 +1,20 @@
 import IO_Module as IOm
 import JWT_Module as JWTm
+import HTTP_Module as HTTPm
 
 
 if __name__ == "__main__":
     url, token, corrections, attack_type, mode, wordlist= IOm.get_input()
 
     IOm.launch_info(url, token, corrections, attack_type, mode, wordlist)
+
+    # #checking if host is up
+    # HTTPm.check_url(url.split(":")[1][2:])
+
+    if mode == "sc":
+        HTTPm.get_status_code(url, token)
+    if mode == "ra":
+        HTTPm.preparation(url, token)
 
     if '0' in attack_type:
         IOm.printstage("Enumerating keys...")

@@ -1,4 +1,6 @@
 import sys
+import os
+import string
 from tqdm import tqdm
 from termcolor import cprint
 
@@ -43,6 +45,7 @@ def print_JWT(jwt):
 
 
 def get_input():
+    jwt_alphabet = string.ascii_letters + './+' + string.digits
     available_flags = ["--url", "--corrections", "--verbose", "--wordlist", "--token", "--help", "--attack-type", "--mode", "-m","-a" "-h", "-t", "-w", "-v", "-c", "-u"]
 
     sys.argv = sys.argv[1:]
@@ -66,8 +69,6 @@ def get_input():
             except:
                 i = sys.argv.index("--token")
 
-            # might as well add regurlar expression for the JWT
-
             if i != len(sys.argv)-1:
                 if sys.argv[i+1][0] == "-":
                     printerr("ERROR: Token was not provided! Aborting...")
@@ -78,7 +79,7 @@ def get_input():
                 printerr("ERROR: Token was not provided! Aborting...")
                 exit()
 
-         #* finding attack method in sys.argv
+        #* finding attack method in sys.argv
         if "-a" not in sys.argv and "--attack-type" not in sys.argv:
             printerr("ERROR: Attack method was not provided ! Aborting...")
             exit()
@@ -93,11 +94,12 @@ def get_input():
                     printerr("ERROR: Attack method was not provided! Aborting...")
                     exit()
                 else:
-                    attack_type = list(sys.argv[i+1])
+                    attack_type = sys.argv[i+1]
             else:
                 printerr("ERROR: Attack method was not provided! Aborting...")
                 exit()
         
+        #* finding mode in sys.argv
         if "-m" not in sys.argv and "--mode" not in sys.argv:
             printnote("NOTE: Mode was not provided! Using status codesby default")
             mode = "sc"
@@ -182,5 +184,19 @@ def get_input():
                 printnote("NOTE: Wordlist was not provided, using rockyou.txt as defualt...")
                 wordlist = "rockyou.txt"
 
+        # Some Error Handling
+        if mode not in ["sc", "ra"]:
+            printerr(f"Unknown mode! --> {mode}")
+            exit()
 
+        if attack_type not in '0123':
+            printerr(f"Unknown attack method! --> {attack_type}")
+            exit()
+        else:
+            attack_type = list(attack_type)
+
+        if not os.path.exists("./" + wordlist):
+            printerr(f"Specidied wordlist doesn't seem to exist! --> {wordlist}")
+            exit()
+        
         return url, token, corrections, attack_type, mode, wordlist
