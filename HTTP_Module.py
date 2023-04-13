@@ -27,9 +27,12 @@ def preparation(url, token):
     #* Determine the Typical Service Response (Dynamic and Static parts)
     pass
 
-def request(jwt, key, url, mode):
+def request(jwt, key, url, mode, filename):
+    if url == 'None':
+        return IOm.write_to_file(jwt, filename)
+
     if mode == "sc":
-        req = requests.head(url, cookies={"jwt":jwt})
+        req = requests.head(url, cookies={"jwt":jwt}, headers={"Authorization":jwt})
         if req.status_code != default_code:
             IOm.print_JWT(jwt, key)
             return True

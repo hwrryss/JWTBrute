@@ -22,7 +22,6 @@ def help():
     print("-c, --corrections     Corrections to JWT payload (key=value)")
 
 def launch_info(url, token, corrections, attack_type, mode, wordlist):
-
     attack_types = {
         "0":"Weak Key",
         "1":"Algorithm: None",
@@ -44,10 +43,15 @@ def print_JWT(jwt, key):
         tqdm.write(f" [+] This JWT might work! {jwt}\n [+] Secret for the JWT: {key}\n")
     # printsol(f"[+] This JWT might work! {jwt}") # breaks the progres bar
 
+def write_to_file(jwt, filename):
+    f = open(f"{filename}", "a")
+    f.write(jwt + "\n")
+    f.close()
 
 def get_input():
     jwt_alphabet = string.ascii_letters + './+' + string.digits
-    available_flags = ["--url", "--corrections", "--verbose", "--wordlist", "--token", "--help", "--attack-type", "--mode", "-m","-a" "-h", "-t", "-w", "-v", "-c", "-u"]
+    url = 'None'
+    available_flags = ["--url", "--corrections", "--verbose", "--wordlist", "--token", "--help", "--attack-type", "--mode", "--output-name", "-o", "-m","-a" "-h", "-t", "-w", "-v", "-c", "-u"]
 
     sys.argv = sys.argv[1:]
 
@@ -102,8 +106,8 @@ def get_input():
         
         #* finding mode in sys.argv
         if "-m" not in sys.argv and "--mode" not in sys.argv:
-            printnote("NOTE: Mode was not provided! Using status codesby default")
-            mode = "sc"
+            printnote("NOTE: Mode was not provided! Writing into a file by default")
+            mode = "fw"
         else:
             try:
                 i = sys.argv.index("-m")
@@ -122,24 +126,25 @@ def get_input():
                 exit()
 
         #* finding url in sys.argv
-        if "-u" not in sys.argv and "--url" not in sys.argv:
-            printerr("ERROR: Target URL was not provided! Aborting...")
-            exit()
-        else:
-            try:
-                i = sys.argv.index("-u")
-            except:
-                i = sys.argv.index("--url")
-
-            if i != len(sys.argv)-1:
-                if sys.argv[i+1][0] == "-":
-                    printerr("ERROR: Target URL was not provided! Aborting...")
-                    exit()
-                else:
-                    url = sys.argv[i+1]
-            else:
-                printerr("ERROR: Target URL was not provided! Aborting...")
+        if mode in ["sc", "ra", "da"]:
+            if "-u" not in sys.argv and "--url" not in sys.argv:
+                printerr("ERROR: Target URL was not provided!")
                 exit()
+            else:
+                try:
+                    i = sys.argv.index("-u")
+                except:
+                    i = sys.argv.index("--url")
+
+                if i != len(sys.argv)-1:
+                    if sys.argv[i+1][0] == "-":
+                        printerr("ERROR: Target URL was not provided!")
+                        exit()
+                    else:
+                        url = sys.argv[i+1]
+                else:
+                    printerr("ERROR: Target URL was not provided!")
+                    exit()
 
         #* finding payload corrections in sys.argv
         if "-c" not in sys.argv and "--corrections" not in sys.argv:
@@ -155,13 +160,14 @@ def get_input():
             if i == len(sys.argv)-1:
                 printnote("NOTE: No corrections were provided. Double-check if that is what you need. We don't want you to bruteforce for nothing :)")
             else:
-                while i != len(sys.argv)-1:
-                    if sys.argv[i+1][0] == "-":
+                if sys.argv[i+1][0] == "-":
                         printnote("NOTE: No corrections were provided. Double-check if that is what you need. We don't want you to bruteforce for nothing :)")
-                        break
-                    i+=1
-                    corrections.append(sys.argv[i].split("="))
-
+                else:
+                    while i != len(sys.argv)-1:
+                        if sys.argv[i+1][0] == "-":
+                            break
+                        i+=1
+                        corrections.append(sys.argv[i].split("="))
 
         #* finding worlist in sys.argv
         if "-w" not in sys.argv and "--wordlist" not in sys.argv:
@@ -185,8 +191,27 @@ def get_input():
                 printnote("NOTE: Wordlist was not provided, using rockyou.txt as defualt...")
                 wordlist = "rockyou.txt"
 
-        # Some Error Handling
-        if mode not in ["sc", "ra"]:
+        #* finding output filename in sys.argv
+        if "-o" not in sys.argv and "--output-name" not in sys.argv:
+            filename = "output.txt"
+
+        else:
+            try:
+                i = sys.argv.index("-o")
+            except:
+                i = sys.argv.index("--output-file")
+
+            if i != len(sys.argv)-1:
+                if sys.argv[i+1][0] == "-":
+                    filename = "output.txt"
+                else:
+                    filename = sys.argv[i+1]
+
+            else:
+                filename = "output.txt"
+
+        #* Some Error Handling
+        if mode not in ["sc", "ra", "fw", "da"]:
             printerr(f"Unknown mode! --> {mode}")
             exit()
 
@@ -200,4 +225,4 @@ def get_input():
             printerr(f"Specidied wordlist doesn't seem to exist! --> {wordlist}")
             exit()
         
-        return url, token, corrections, attack_type, mode, wordlist
+        return url, token, corrections, attack_type, mode, wordlist, filename
